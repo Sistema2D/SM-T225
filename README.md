@@ -94,9 +94,9 @@ That is the earliest hook Magisk provides; removing it would require a kernel ch
 
 ### Screenshots
 
-| Home | Settings | Quick settings | Boot |
-|---|---|---|---|
-| <img src="docs/img/home.png" alt="Home screen" width="100%"> | <img src="docs/img/settings.png" alt="Settings" width="100%"> | <img src="docs/img/quicksettings.png" alt="Quick settings" width="100%"> | <img src="docs/img/boot.png" alt="Boot screen" width="100%"> |
+| Home | App drawer | Settings | Quick settings | Boot |
+|---|---|---|---|---|
+| <img src="docs/img/home.png" alt="Home screen" width="100%"> | <img src="docs/img/drawer.png" alt="App drawer" width="100%"> | <img src="docs/img/settings.png" alt="Settings" width="100%"> | <img src="docs/img/quicksettings.png" alt="Quick settings" width="100%"> | <img src="docs/img/boot.png" alt="Boot screen" width="100%"> |
 
 ### Credits
 
@@ -235,9 +235,9 @@ gancho mais cedo que o Magisk oferece; remover exigiria mexer no kernel.
 
 ### Capturas
 
-| Início | Configurações | Painel rápido | Boot |
-|---|---|---|---|
-| <img src="docs/img/home.png" alt="Tela inicial" width="100%"> | <img src="docs/img/settings.png" alt="Configurações" width="100%"> | <img src="docs/img/quicksettings.png" alt="Painel rápido" width="100%"> | <img src="docs/img/boot.png" alt="Tela de boot" width="100%"> |
+| Início | Gaveta | Configurações | Painel rápido | Boot |
+|---|---|---|---|---|
+| <img src="docs/img/home.png" alt="Tela inicial" width="100%"> | <img src="docs/img/drawer.png" alt="Gaveta de apps" width="100%"> | <img src="docs/img/settings.png" alt="Configurações" width="100%"> | <img src="docs/img/quicksettings.png" alt="Painel rápido" width="100%"> | <img src="docs/img/boot.png" alt="Tela de boot" width="100%"> |
 
 ### Créditos
 
@@ -320,3 +320,6 @@ Apache 2.0 — veja [LICENSE](LICENSE). Os projetos creditados mantêm as própr
 **By [Sistema2D](https://github.com/Sistema2D)** · [Buy Me a Coffee](https://buymeacoffee.com/hugomelovek) · [LinkedIn](https://www.linkedin.com/in/hugoaraujo92/)
 
 </div>
+
+<!-- As capturas foram sanitizadas: o nome da rede Wi-Fi e o estado do chip
+     foram substituídos por valores genéricos. -->
