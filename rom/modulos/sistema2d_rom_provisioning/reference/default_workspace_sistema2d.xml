@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Workspace padrão para a futura build do Trebuchet/Launcher3 da ROM.
+     Deve substituir o recurso default_workspace usado pela variante do SM-T225.
+     28/08/2026: widget e atalho do Net Ripper removidos (app descontinuado). -->
+<favorites xmlns:launcher="http://schemas.android.com/apk/res-auto/com.android.launcher3">
+    <appwidget
+        launcher:container="-100" launcher:screen="0" launcher:x="0" launcher:y="0"
+        launcher:spanX="2" launcher:spanY="1"
+        launcher:packageName="com.android.deskclock"
+        launcher:className="com.android.alarmclock.DigitalAppWidgetProvider" />
+
+    <favorite launcher:container="-101" launcher:screen="0" launcher:x="0" launcher:y="0"
+        launcher:packageName="com.android.contacts" launcher:className="com.android.contacts.activities.PeopleActivity" />
+    <favorite launcher:container="-101" launcher:screen="1" launcher:x="1" launcher:y="0"
+        launcher:packageName="org.lineageos.etar" launcher:className="com.android.calendar.AllInOneActivity" />
+    <favorite launcher:container="-101" launcher:screen="2" launcher:x="2" launcher:y="0"
+        launcher:packageName="org.lineageos.eleven" launcher:className="org.lineageos.eleven.ui.activities.HomeActivity" />
+    <favorite launcher:container="-101" launcher:screen="3" launcher:x="3" launcher:y="0"
+        launcher:packageName="org.lineageos.aperture" launcher:className="org.lineageos.aperture.CameraLauncher" />
+</favorites>

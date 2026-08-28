@@ -1,0 +1,6 @@
+id=sistema2d_rom_provisioning
+name=Sistema2D — First Boot Provisioning
+version=1.2
+versionCode=3
+author=Sistema2D
+description=Applies PT-BR locale defaults on first boot. Net Ripper provisioning was discontinued on 2026-08-28.

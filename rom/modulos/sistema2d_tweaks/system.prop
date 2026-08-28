@@ -1,0 +1,9 @@
+# Sistema2D - Performance Tweaks
+# Aplicado por resetprop no post-fs-data pelo Magisk.
+
+# P4 - desliga os daemons Perfetto (traced + traced_probes).
+# Sem utilidade fora de depuracao. VERIFICADO em 28/08/2026: apos reiniciar,
+# nenhum processo traced sobe (antes eram dois, ~3,3 MB residentes).
+persist.traced.enable=0
+
+# P5 (camera bufnum 4 -> 2) FOI TESTADO E REVERTIDO. Ver README.txt.

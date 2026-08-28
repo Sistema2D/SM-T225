@@ -1,0 +1,6 @@
+id=sistema2d_bootanim
+name=Sistema2D Boot
+version=11.0
+versionCode=11
+author=Sistema2D
+description=Static SAMSUNG screen through the whole boot: painted into the framebuffer at post-fs-data and shown as a single-frame bootanimation. Replaces the 150-frame animation, which measured ~2s slower.
