@@ -15,7 +15,7 @@ Módulos Magisk e overlays RRO. A imagem de sistema não é modificada.
 [![Device](https://img.shields.io/badge/Device-SM--T225_gta7lite-6f42c1?style=flat-square)](https://github.com/Sistema2D/SM-T225)
 [![PoweredBy](https://img.shields.io/badge/PoweredBy-FCVW-6f42c1?style=flat-square)](https://github.com/Sistema2D/FrameCode-VibeWork)
 
-Versão **v1.0.0** · Android 14 · [Página do projeto](https://sistema2d.github.io/SM-T225/)
+Versão **v1.0.0** · Android 14
 
 [![PT-BR](https://img.shields.io/badge/Leia_em-PT--BR-009C3B?style=for-the-badge)](#pt-br)
 [![ENG-US](https://img.shields.io/badge/Read_in-ENG--US-3C3B6E?style=for-the-badge)](#en-us)
@@ -25,7 +25,7 @@ Versão **v1.0.0** · Android 14 · [Página do projeto](https://sistema2d.githu
 ---
 
 <div align="center">
-  <img src="docs/img/home.png" alt="Sistema2D home screen" width="42%">
+  <img src="img/home.png" alt="Sistema2D home screen" width="42%">
 </div>
 
 ---
@@ -96,7 +96,7 @@ That is the earliest hook Magisk provides; removing it would require a kernel ch
 
 | Home | App drawer | Settings | Quick settings | Boot |
 |---|---|---|---|---|
-| <img src="docs/img/home.png" alt="Home screen" width="100%"> | <img src="docs/img/drawer.png" alt="App drawer" width="100%"> | <img src="docs/img/settings.png" alt="Settings" width="100%"> | <img src="docs/img/quicksettings.png" alt="Quick settings" width="100%"> | <img src="docs/img/boot.png" alt="Boot screen" width="100%"> |
+| <img src="img/home.png" alt="Home screen" width="100%"> | <img src="img/drawer.png" alt="App drawer" width="100%"> | <img src="img/settings.png" alt="Settings" width="100%"> | <img src="img/quicksettings.png" alt="Quick settings" width="100%"> | <img src="img/boot.png" alt="Boot screen" width="100%"> |
 
 ### Credits
 
@@ -120,18 +120,150 @@ this repository.
 
 ### Installation
 
-The full procedure is in [INSTALL.md](INSTALL.md), from a stock tablet to a booted
-system, with the key combinations and the reason for each step.
+Requirements: an **SM-T225** (not the T220 Wi-Fi model, the vendor partition differs), a
+Windows PC, a USB cable, and the tablet at 60%+ battery. Around 40 minutes.
 
-Short version:
+#### Step 0 — Get the files
 
-1. Unlock the bootloader (**wipes everything, trips Knox**).
-2. Flash TWRP with Odin, `Auto Reboot` **off**.
-3. In TWRP: format data, flash the FBE disabler.
-4. Flash the LineageOS GSI to the system partition.
-5. Flash Magisk.
-6. Flash the four Sistema2D modules.
-7. Reboot, then run `rom/ajustes/aplicar-ajustes.ps1`.
+Run `ferramentas/baixar-ferramentas.ps1`. It downloads Odin, the Samsung USB driver and
+Google's platform-tools from their official sources and checks each SHA-256 against the
+versions this project was tested with.
+
+From the [release](https://github.com/Sistema2D/SM-T225/releases), download:
+
+| File | What it is |
+|---|---|
+| `lineage-21.0-arm64_bgN.img.gz` | The LineageOS GSI — the base system |
+| `TWRP_v2.2_gta7lite.tar` | Recovery, flashed with Odin |
+| `fbe_disabler_gta7lite.zip` | Disables file-based encryption so TWRP can read `/data` |
+| `Magisk-v30.7.apk` | Root, and the delivery mechanism for every module |
+| `sistema2d_*.zip` (four files) | The Sistema2D layer |
+| `99-aosp-tweaks.sh` | sysctl tuning, goes to `/data/adb/service.d/` |
+
+Install the Samsung USB driver and reboot the PC. Windows will not see Download Mode
+without it.
+
+#### Step 1 — Unlock the bootloader
+
+1. **Settings → About tablet → Software information**, tap **Build number** seven times.
+2. **Settings → Developer options**: enable **USB debugging** and **OEM unlocking**.
+   If *OEM unlocking* is missing, connect to Wi-Fi and wait — Samsung gates it for about
+   7 days after a factory reset.
+3. Power off completely.
+4. Hold **Volume Up + Volume Down** together and plug in the USB cable.
+5. At the warning screen, hold **Volume Up** for a few seconds to enter
+   *Device Unlock Mode*.
+6. Confirm with **Volume Up**. The tablet wipes itself and reboots.
+7. Run through setup, connect to Wi-Fi, and confirm in Developer options that
+   **OEM unlocking is still on and greyed out** — that means it took.
+
+#### Step 2 — Flash TWRP
+
+1. Power off. Hold **Volume Up + Volume Down**, plug in the cable, then tap **Volume Up**
+   once to enter Download Mode.
+2. Open `Odin3_v3.14.4.exe`. The **ID:COM** box must turn blue. If it stays grey, the
+   driver is not installed.
+3. In **Options**, **uncheck `Auto Reboot`**. If the tablet reboots on its own, stock
+   Android restores its own recovery and TWRP is gone.
+4. Click **AP**, pick `TWRP_v2.2_gta7lite.tar`, then **Start**. Wait for the green
+   **PASS!**
+
+#### Step 3 — First boot into TWRP, and decrypt
+
+Timing matters. Straight from the Download Mode screen:
+
+1. Hold **Power + Volume Down** for ~7 seconds until the screen goes dark.
+2. The instant it goes dark, switch to **Power + Volume Up** and hold until the TWRP logo
+   appears.
+
+If you land in Android instead, stock recovery already replaced TWRP — redo step 2.
+
+In TWRP:
+
+3. Swipe to **Allow Modifications**.
+4. **Wipe → Format Data**, type `yes`, confirm. This removes the encryption that stops
+   TWRP from reading `/data`.
+5. **Reboot → Recovery** to come back with the partitions readable.
+6. Copy `fbe_disabler_gta7lite.zip` to the tablet (`adb push` or USB storage) and
+   **Install** it.
+
+#### Step 4 — Flash the GSI
+
+1. Decompress `lineage-21.0-arm64_bgN.img.gz` and copy the `.img` to the tablet. TWRP
+   needs the uncompressed image.
+2. **Install → Install Image**.
+3. Pick the `.img` and target the **System Image** partition. Swipe to confirm.
+4. **Wipe → Advanced Wipe** → check **Cache** and **Dalvik / ART Cache** → swipe.
+5. **Reboot → System.** The first boot takes 2–5 minutes. Complete the Android setup.
+
+At this point you have plain LineageOS. Everything so far is other people's work — see
+the credits above.
+
+#### Step 5 — Magisk
+
+Install `Magisk-v30.7.apk` on the running system, open it, and follow any additional
+setup it asks for.
+
+#### Step 6 — The Sistema2D layer
+
+In the Magisk app, **Modules → Install from storage**, one at a time:
+
+| Order | Module | What it does |
+|---|---|---|
+| 1 | `sistema2d_tweaks.zip` | Turns off the Perfetto daemons |
+| 2 | `sistema2d_bootanim.zip` | Continuous SAMSUNG boot screen |
+| 3 | `sistema2d_ui_ios.zip` | The interface overlays |
+| 4 | `sistema2d_rom_provisioning.zip` | pt-BR locale on first boot |
+
+Then place the sysctl script:
+
+```bash
+adb push 99-aosp-tweaks.sh /data/local/tmp/
+adb shell su -c 'cp /data/local/tmp/99-aosp-tweaks.sh /data/adb/service.d/ && chmod 0755 /data/adb/service.d/99-aosp-tweaks.sh'
+```
+
+**Reboot.** The overlays enable themselves on the first boot after install.
+
+#### Step 7 — Settings-level tuning
+
+The density and the animation scales live in Android's settings, not in a module:
+
+```powershell
+.
+omjustesplicar-ajustes.ps1
+```
+
+This is the step that applies the 200 dpi change. Without it the tablet keeps phone
+layouts.
+
+#### Step 8 — Optional: the bootloader splash
+
+The SAMSUNG screen the bootloader shows lives in the `up_param` partition. Replacing it
+is the only genuinely risky operation here — that partition also holds the Download Mode
+and recovery screens.
+
+It is entirely optional; only the very first screen differs. The image, the validator and
+the procedure are in `rom/boot/`. Back up the partition and verify the SHA-256 before and
+after.
+
+#### Verifying
+
+```bash
+adb shell am get-config | grep -o "sw[0-9]*dp"      # expect sw640dp
+adb shell cmd overlay list | grep sistema2d          # expect four [x]
+adb shell getprop persist.traced.enable              # expect 0
+```
+
+#### If something goes wrong
+
+| Symptom | Cause and fix |
+|---|---|
+| Odin: `FAIL! (Auth)` | Bootloader still locked, or the wrong file in AP. |
+| TWRP replaced by stock recovery | `Auto Reboot` was left on in step 2. Redo it. |
+| TWRP shows `/data` as `0 MB` | Format Data was skipped in step 3. |
+| Boot loops after the GSI | Wipe Cache and Dalvik, then reboot again. |
+| Overlays not applied | Check `logcat -b all \| grep denied`. This is almost always the SELinux context; the module's `customize.sh` handles it, so install through the Magisk app rather than copying files by hand. |
+| Want everything back | Flash Samsung's stock firmware with Odin. The Knox fuse stays tripped. |
 
 ### Repository layout
 
@@ -142,7 +274,7 @@ rom/boot/         boot art generators and the 55 stock up_param resources
 rom/ajustes/      apply/revert scripts for settings-level tuning
 rom/empacotar.py  packages the modules into flashable zips
 ferramentas/      downloader for the third-party tools
-docs/             project page and screenshots
+img/              screenshots
 ```
 
 ### Not included here
@@ -152,7 +284,7 @@ and are not redistributed here. The Android platform-tools come from Google's ow
 URL. `ferramentas/baixar-ferramentas.ps1` fetches each of them from its official source
 and checks the SHA-256 against the versions this project was actually tested with.
 
-TWRP and Magisk are open source and **are** published in the
+The LineageOS GSI, TWRP and Magisk are open source and are published in the
 [release](https://github.com/Sistema2D/SM-T225/releases), as the exact builds used.
 
 ### Reverting
@@ -237,7 +369,7 @@ gancho mais cedo que o Magisk oferece; remover exigiria mexer no kernel.
 
 | Início | Gaveta | Configurações | Painel rápido | Boot |
 |---|---|---|---|---|
-| <img src="docs/img/home.png" alt="Tela inicial" width="100%"> | <img src="docs/img/drawer.png" alt="Gaveta de apps" width="100%"> | <img src="docs/img/settings.png" alt="Configurações" width="100%"> | <img src="docs/img/quicksettings.png" alt="Painel rápido" width="100%"> | <img src="docs/img/boot.png" alt="Tela de boot" width="100%"> |
+| <img src="img/home.png" alt="Tela inicial" width="100%"> | <img src="img/drawer.png" alt="Gaveta de apps" width="100%"> | <img src="img/settings.png" alt="Configurações" width="100%"> | <img src="img/quicksettings.png" alt="Painel rápido" width="100%"> | <img src="img/boot.png" alt="Tela de boot" width="100%"> |
 
 ### Créditos
 
@@ -261,18 +393,151 @@ scripts deste repositório.
 
 ### Instalação
 
-O procedimento completo está em [INSTALL.md](INSTALL.md), do tablet de fábrica ao sistema
-iniciado, com as combinações de teclas e o motivo de cada passo.
+Requisitos: um **SM-T225** (não o T220 Wi-Fi, a partição vendor é diferente), um PC com
+Windows, cabo USB e o tablet com 60%+ de bateria. Cerca de 40 minutos.
 
-Versão curta:
+#### Passo 0 — Obter os arquivos
 
-1. Desbloquear o bootloader (**apaga tudo e queima o Knox**).
-2. Gravar o TWRP pelo Odin, com `Auto Reboot` **desmarcado**.
-3. No TWRP: formatar data e gravar o desativador de FBE.
-4. Gravar a GSI do LineageOS na partição system.
-5. Gravar o Magisk.
-6. Gravar os quatro módulos Sistema2D.
-7. Reiniciar e rodar `rom/ajustes/aplicar-ajustes.ps1`.
+Rode `ferramentas/baixar-ferramentas.ps1`. Ele baixa o Odin, o driver USB Samsung e as
+platform-tools do Google das fontes oficiais e confere o SHA-256 de cada um contra as
+versões com que o projeto foi testado.
+
+Da [release](https://github.com/Sistema2D/SM-T225/releases), baixe:
+
+| Arquivo | O que é |
+|---|---|
+| `lineage-21.0-arm64_bgN.img.gz` | A GSI do LineageOS — o sistema base |
+| `TWRP_v2.2_gta7lite.tar` | Recovery, gravado pelo Odin |
+| `fbe_disabler_gta7lite.zip` | Desativa a criptografia para o TWRP ler o `/data` |
+| `Magisk-v30.7.apk` | Root, e o mecanismo de entrega dos módulos |
+| `sistema2d_*.zip` (quatro) | A camada Sistema2D |
+| `99-aosp-tweaks.sh` | Ajustes de sysctl, vai para `/data/adb/service.d/` |
+
+Instale o driver USB Samsung e reinicie o PC. Sem ele o Windows não enxerga o Modo
+Download.
+
+#### Passo 1 — Desbloquear o bootloader
+
+1. **Configurações → Sobre o tablet → Informações de software**, toque sete vezes em
+   **Número da versão**.
+2. **Configurações → Opções do desenvolvedor**: ative **Depuração USB** e
+   **Desbloqueio de OEM**. Se *Desbloqueio de OEM* não aparecer, conecte ao Wi-Fi e
+   aguarde — a Samsung o libera cerca de 7 dias após um reset de fábrica.
+3. Desligue por completo.
+4. Segure **Volume + e Volume −** juntos e conecte o cabo USB.
+5. Na tela de advertência, segure **Volume +** por alguns segundos para entrar no
+   *Device Unlock Mode*.
+6. Confirme com **Volume +**. O tablet se formata e reinicia.
+7. Passe pela configuração inicial, conecte ao Wi-Fi e confirme nas Opções do
+   desenvolvedor que o **Desbloqueio de OEM continua ligado e esmaecido** — é o sinal de
+   que pegou.
+
+#### Passo 2 — Gravar o TWRP
+
+1. Desligue. Segure **Volume + e Volume −**, conecte o cabo e toque **Volume +** uma vez
+   para entrar no Modo Download.
+2. Abra o `Odin3_v3.14.4.exe`. A caixa **ID:COM** precisa ficar azul. Se continuar cinza,
+   o driver não está instalado.
+3. Em **Options**, **desmarque `Auto Reboot`**. Se o tablet reiniciar sozinho, o Android
+   de fábrica restaura o próprio recovery e o TWRP se perde.
+4. Clique em **AP**, escolha `TWRP_v2.2_gta7lite.tar` e **Start**. Espere o **PASS!**
+   verde.
+
+#### Passo 3 — Primeiro acesso ao TWRP e descriptografia
+
+Aqui o tempo importa. Direto da tela de Modo Download:
+
+1. Segure **Power + Volume −** por ~7 segundos, até a tela apagar.
+2. No instante em que apagar, troque para **Power + Volume +** e segure até aparecer a
+   logo do TWRP.
+
+Se cair no Android, o recovery de fábrica já substituiu o TWRP — refaça o passo 2.
+
+No TWRP:
+
+3. Deslize em **Allow Modifications**.
+4. **Wipe → Format Data**, digite `yes` e confirme. Isso remove a criptografia que impede
+   o TWRP de ler o `/data`.
+5. **Reboot → Recovery** para voltar com as partições legíveis.
+6. Copie o `fbe_disabler_gta7lite.zip` para o tablet (`adb push` ou armazenamento USB) e
+   use **Install**.
+
+#### Passo 4 — Gravar a GSI
+
+1. Descompacte o `lineage-21.0-arm64_bgN.img.gz` e copie o `.img` para o tablet. O TWRP
+   precisa da imagem descompactada.
+2. **Install → Install Image**.
+3. Escolha o `.img` e aponte para a partição **System Image**. Deslize para confirmar.
+4. **Wipe → Advanced Wipe** → marque **Cache** e **Dalvik / ART Cache** → deslize.
+5. **Reboot → System.** O primeiro boot leva de 2 a 5 minutos. Conclua a configuração do
+   Android.
+
+Neste ponto você tem LineageOS puro. Tudo até aqui é trabalho de outras pessoas — veja os
+créditos acima.
+
+#### Passo 5 — Magisk
+
+Instale o `Magisk-v30.7.apk` no sistema já rodando, abra o app e siga a configuração
+adicional que ele pedir.
+
+#### Passo 6 — A camada Sistema2D
+
+No app do Magisk, **Módulos → Instalar do armazenamento**, um de cada vez:
+
+| Ordem | Módulo | O que faz |
+|---|---|---|
+| 1 | `sistema2d_tweaks.zip` | Desliga os daemons Perfetto |
+| 2 | `sistema2d_bootanim.zip` | Tela de boot SAMSUNG contínua |
+| 3 | `sistema2d_ui_ios.zip` | Os overlays da interface |
+| 4 | `sistema2d_rom_provisioning.zip` | Idioma pt-BR no primeiro boot |
+
+Depois coloque o script de sysctl no lugar:
+
+```bash
+adb push 99-aosp-tweaks.sh /data/local/tmp/
+adb shell su -c 'cp /data/local/tmp/99-aosp-tweaks.sh /data/adb/service.d/ && chmod 0755 /data/adb/service.d/99-aosp-tweaks.sh'
+```
+
+**Reinicie.** Os overlays se ativam sozinhos no primeiro boot depois da instalação.
+
+#### Passo 7 — Ajustes de settings
+
+A densidade e as escalas de animação vivem nas settings do Android, não em módulo:
+
+```powershell
+.\rom\ajustes\aplicar-ajustes.ps1
+```
+
+É o passo que aplica a mudança para 200 dpi. Sem ele o tablet continua com layout de
+telefone.
+
+#### Passo 8 — Opcional: a splash do bootloader
+
+A tela SAMSUNG que o bootloader mostra fica na partição `up_param`. Trocá-la é a única
+operação de risco real aqui — essa partição também guarda as telas de Modo Download e
+recovery.
+
+É totalmente opcional; só a primeira tela muda. A imagem, o validador e o procedimento
+estão em `rom/boot/`. Faça backup da partição e confira o SHA-256 antes e depois.
+
+#### Conferir
+
+```bash
+adb shell am get-config | grep -o "sw[0-9]*dp"      # esperado sw640dp
+adb shell cmd overlay list | grep sistema2d          # esperado quatro [x]
+adb shell getprop persist.traced.enable              # esperado 0
+```
+
+#### Se algo der errado
+
+| Sintoma | Causa e correção |
+|---|---|
+| Odin: `FAIL! (Auth)` | Bootloader ainda bloqueado, ou arquivo errado no AP. |
+| TWRP virou recovery de fábrica | O `Auto Reboot` ficou marcado no passo 2. Refaça. |
+| TWRP mostra `/data` como `0 MB` | O Format Data foi pulado no passo 3. |
+| Fica em loop de boot após a GSI | Limpe Cache e Dalvik e reinicie de novo. |
+| Overlays não aplicaram | Veja `logcat -b all \| grep denied`. Quase sempre é o contexto SELinux; o `customize.sh` do módulo resolve, então instale pelo app do Magisk em vez de copiar arquivos na mão. |
+| Quer tudo de volta | Grave o firmware de fábrica pelo Odin. O fusível Knox continua queimado. |
 
 ### Estrutura do repositório
 
@@ -283,7 +548,7 @@ rom/boot/         geradores da arte de boot e os 55 recursos do up_param
 rom/ajustes/      scripts de aplicar/reverter os ajustes de settings
 rom/empacotar.py  empacota os módulos em zips flasháveis
 ferramentas/      baixador das ferramentas de terceiros
-docs/             página do projeto e capturas
+img/              capturas de tela
 ```
 
 ### O que não está incluído
@@ -293,7 +558,7 @@ e não são redistribuídos. As platform-tools vêm da URL estável do próprio 
 `ferramentas/baixar-ferramentas.ps1` busca cada um na fonte oficial e confere o SHA-256
 contra as versões com que este projeto foi de fato testado.
 
-TWRP e Magisk são abertos e **estão** publicados na
+A GSI do LineageOS, o TWRP e o Magisk são abertos e estão publicados na
 [release](https://github.com/Sistema2D/SM-T225/releases), nas builds exatas usadas.
 
 ### Reverter
@@ -320,6 +585,3 @@ Apache 2.0 — veja [LICENSE](LICENSE). Os projetos creditados mantêm as própr
 **By [Sistema2D](https://github.com/Sistema2D)** · [Buy Me a Coffee](https://buymeacoffee.com/hugomelovek) · [LinkedIn](https://www.linkedin.com/in/hugoaraujo92/)
 
 </div>
-
-<!-- As capturas foram sanitizadas: o nome da rede Wi-Fi e o estado do chip
-     foram substituídos por valores genéricos. -->
