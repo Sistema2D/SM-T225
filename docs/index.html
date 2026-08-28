@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sistema2D · SM-T225</title>
-<meta name="description" content="Uma GSI LineageOS 21 ajustada de ponta a ponta para o Galaxy Tab A7 Lite: interface estilo iPad, layouts de tablet destravados e boot SAMSUNG contínuo.">
+<meta name="description" content="Camada de ajuste para uma GSI LineageOS 21 no Samsung Galaxy Tab A7 Lite (SM-T225). Módulos Magisk e overlays RRO.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -114,8 +114,8 @@ footer a{color:var(--accent-ink)}
     <div>
       <div class="eyebrow">Galaxy Tab A7 Lite · SM-T225 · gta7lite</div>
       <h1>Sistema2D</h1>
-      <p class="tag">Uma GSI LineageOS 21 ajustada de ponta a ponta para um tablet de 3 GB — entregue como camada, não como imagem.</p>
-      <div class="dots">interface estilo iPad · layouts de tablet destravados · boot SAMSUNG contínuo</div>
+      <p class="tag">Camada de ajuste para uma GSI LineageOS 21 no Samsung Galaxy Tab A7 Lite (SM-T225).</p>
+      <div class="dots">Módulos Magisk e overlays RRO. A imagem de sistema não é modificada.</div>
       <div class="badges">
         <a href="https://github.com/Sistema2D/SM-T225"><img src="https://img.shields.io/badge/GitHub-Sistema2D%2FSM--T225-6f42c1?style=flat-square&logo=github" alt="Repositório"></a>
         <a href="https://buymeacoffee.com/hugomelovek"><img src="https://img.shields.io/badge/Support-BuyMeaCoffee-FFDD00?style=flat-square&logo=buymeacoffee&logoColor=000000" alt="Buy Me a Coffee"></a>
@@ -130,8 +130,8 @@ footer a{color:var(--accent-ink)}
 <div class="wrap">
 
 <section>
-  <h2>O que muda, em números</h2>
-  <p>Tudo aqui foi medido no aparelho, antes e depois. Nada é estimativa.</p>
+  <h2>Mudanças medidas</h2>
+  <p>Valores medidos no aparelho, antes e depois de aplicar a camada.</p>
   <div class="nums" style="margin-top:20px">
     <div><div class="nk">Largura útil</div><div class="nv"><span class="was">582 dp</span><span class="arw">→</span><span class="now">640 dp</span></div><div class="nn">acima do corte de 600 dp</div></div>
     <div><div class="nk">Jank SystemUI</div><div class="nv"><span class="was">35,3%</span><span class="arw">→</span><span class="now">15,7%</span></div><div class="nn">p90 de 350 ms para 44 ms</div></div>
@@ -143,9 +143,9 @@ footer a{color:var(--accent-ink)}
 </section>
 
 <section>
-  <h2>A descoberta que vale por todas</h2>
-  <p>O painel tem 800×1340 com densidade física 213, mas o sistema carregava uma sobreposição de 220 dpi. Isso colocava a largura útil em <strong>582 dp</strong> — logo abaixo do corte de <strong>600 dp</strong> que o Android usa para decidir se um aparelho é tablet.</p>
-  <p>Dezoito dp custavam a taskbar, as Configurações em duas colunas e o comportamento de multi-janela. <strong>Baixar para 200 dpi devolve tudo isso</strong>, e o Launcher3 ainda migra sozinho para uma grade maior.</p>
+  <h2>Densidade</h2>
+  <p>O painel tem 800×1340 com densidade física 213, mas o sistema carregava uma sobreposição de 220 dpi. Isso colocava a largura útil em 582 dp, abaixo do corte de 600 dp que o Android usa para layouts de tela grande.</p>
+  <p>Nessa largura o sistema usa layout de telefone: sem taskbar, sem Configurações em duas colunas e com multi-janela reduzida. Definir 200 dpi dá 640 dp, e o Launcher3 migra sozinho para uma grade maior.</p>
 </section>
 
 <section>
@@ -159,10 +159,10 @@ footer a{color:var(--accent-ink)}
 </section>
 
 <section>
-  <h2>O boot, medido</h2>
-  <p>A tela preta entre a splash da Samsung e a animação não era “alguns segundos”. O <span class="mono">ro.boottime.*</span> mostrou o tamanho real do problema — e uma surpresa: <strong>o surfaceflinger sobe 8,6 s antes de qualquer coisa ser desenhada</strong>.</p>
-  <p>A correção pinta a tela SAMSUNG direto em <span class="mono">/dev/graphics/fb0</span> a partir do <span class="mono">post-fs-data</span>, e continua repintando até a bootanim assumir. Isso provou que o surfaceflinger, de pé mas sem nada para compor, não limpa o framebuffer.</p>
-  <p>A animação de 150 quadros custava <strong>2,0 s</strong>. Removê-la de vez deixaria vinte segundos de tela preta, então virou um <strong>quadro estático</strong> da mesma tela: 78% do tempo de volta, com o painel aceso o caminho inteiro.</p>
+  <h2>Boot</h2>
+  <p>Medido com <span class="mono">ro.boottime.*</span>: o bootloader sai por volta dos 13,8 s, o surfaceflinger sobe aos 22,5 s e a bootanimation só desenha aos 31,2 s. O painel fica preto nesses intervalos.</p>
+  <p>A camada escreve a tela SAMSUNG em <span class="mono">/dev/graphics/fb0</span> a partir do <span class="mono">post-fs-data</span> e repete até a bootanim assumir; o surfaceflinger, de pé e sem nada para compor, não limpa o framebuffer.</p>
+  <p>A animação de 150 quadros custava cerca de 2,0 s. Removê-la por completo deixaria cerca de vinte segundos de tela preta, então foi trocada por um quadro estático da mesma imagem: 1,54 s dos 1,98 s recuperados. Restam cerca de 7 s de preto antes do <span class="mono">post-fs-data</span> rodar, que é o gancho mais cedo disponível.</p>
 </section>
 
 <section>
@@ -172,12 +172,12 @@ footer a{color:var(--accent-ink)}
   </div>
   <ol class="steps">
     <li>Desbloquear o <b>bootloader</b> pelo Device Unlock Mode.</li>
-    <li>Gravar o <b>TWRP</b> pelo Odin, com <b>Auto Reboot desmarcado</b> — é o passo que as pessoas pulam.</li>
+    <li>Gravar o <b>TWRP</b> pelo Odin, com <b>Auto Reboot desmarcado</b>. Se ficar marcado, o Android de fábrica restaura o próprio recovery.</li>
     <li>No TWRP: <b>Format Data</b> e gravar o desativador de FBE.</li>
     <li>Gravar a <b>GSI do LineageOS</b> na partição System Image.</li>
     <li>Instalar o <b>Magisk</b>.</li>
     <li>Instalar os <b>quatro módulos Sistema2D</b> pelo app do Magisk.</li>
-    <li>Reiniciar e rodar <b>aplicar-ajustes.ps1</b> — é ele que destrava os layouts de tablet.</li>
+    <li>Reiniciar e rodar <b>aplicar-ajustes.ps1</b>, que aplica a densidade e as escalas de animação.</li>
   </ol>
   <div class="cta">
     <a class="btn p" href="https://github.com/Sistema2D/SM-T225/blob/main/INSTALL.md">Guia completo</a>
@@ -187,7 +187,7 @@ footer a{color:var(--accent-ink)}
 
 <section>
   <h2>Créditos</h2>
-  <p>Este projeto é uma camada. O sistema por baixo é trabalho de outras pessoas, e é a maior parte do que você vai rodar.</p>
+  <p>O sistema por baixo é trabalho de outras pessoas e é a maior parte do que roda no aparelho.</p>
   <div class="creditos" style="margin-top:18px">
     <div><div class="c-n"><a href="https://lineageos.org/">LineageOS</a></div><div class="c-d">A base Android 14. A imagem de sistema não foi modificada em nada.</div></div>
     <div><div class="c-n"><a href="https://github.com/phhusson/treble_experimentations">phhusson</a></div><div class="c-d">Os patches Treble que permitem uma imagem genérica rodar sobre o vendor da Samsung. Cinco overlays <span class="mono">me.phh.treble.*</span> estão ativos no aparelho.</div></div>
@@ -202,7 +202,7 @@ footer a{color:var(--accent-ink)}
 
 <footer>
   <div class="wrap">
-    <p style="margin:0 0 8px">Apache 2.0 · Sistema2D é a camada de ajuste; os projetos creditados mantêm as próprias licenças.</p>
+    <p style="margin:0 0 8px">Apache 2.0. Os projetos creditados mantêm as próprias licenças.</p>
     <p style="margin:0"><strong style="color:var(--ink-2)">By <a href="https://github.com/Sistema2D">Sistema2D</a></strong> · <a href="https://buymeacoffee.com/hugomelovek">Buy Me a Coffee</a> · <a href="https://www.linkedin.com/in/hugoaraujo92/">LinkedIn</a></p>
   </div>
 </footer>

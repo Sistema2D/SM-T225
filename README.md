@@ -4,9 +4,9 @@
 
 # Sistema2D · SM-T225
 
-**A LineageOS 21 GSI, tuned end to end for the Galaxy Tab A7 Lite**
+Camada de ajuste para uma GSI LineageOS 21 no Samsung Galaxy Tab A7 Lite (SM-T225).
 
-iPad-style interface · tablet layouts unlocked · continuous SAMSUNG boot · no bloat added
+Módulos Magisk e overlays RRO. A imagem de sistema não é modificada.
 
 [![Support](https://img.shields.io/badge/Support-BuyMeaCoffee-FFDD00?style=flat-square&logo=buymeacoffee&logoColor=000000)](https://buymeacoffee.com/hugomelovek)
 [![License](https://img.shields.io/badge/License-Apache_2.0-6f42c1?style=flat-square)](LICENSE)
@@ -15,7 +15,7 @@ iPad-style interface · tablet layouts unlocked · continuous SAMSUNG boot · no
 [![Device](https://img.shields.io/badge/Device-SM--T225_gta7lite-6f42c1?style=flat-square)](https://github.com/Sistema2D/SM-T225)
 [![PoweredBy](https://img.shields.io/badge/PoweredBy-FCVW-6f42c1?style=flat-square)](https://github.com/Sistema2D/FrameCode-VibeWork)
 
-Stable release **v1.0.0** · Android 14 · [Project page](https://sistema2d.github.io/SM-T225/)
+Versão **v1.0.0** · Android 14 · [Página do projeto](https://sistema2d.github.io/SM-T225/)
 
 [![PT-BR](https://img.shields.io/badge/Leia_em-PT--BR-009C3B?style=for-the-badge)](#pt-br)
 [![ENG-US](https://img.shields.io/badge/Read_in-ENG--US-3C3B6E?style=for-the-badge)](#en-us)
@@ -36,14 +36,13 @@ Stable release **v1.0.0** · Android 14 · [Project page](https://sistema2d.gith
 
 ### What it is
 
-Sistema2D is **not a ROM built from source**. It is a tuning layer applied on top of an
+Sistema2D is not a ROM built from source. It is a tuning layer applied on top of an
 existing LineageOS 21 GSI, delivered as Magisk modules and RRO overlays. The base system
-image is untouched — everything that makes this project is in the layer, which means it
-installs in minutes and reverts by disabling a module.
+image is not modified, so the layer installs in minutes and is undone by disabling a
+module.
 
-The target is one device: the **Samsung Galaxy Tab A7 Lite LTE (SM-T225 / gta7lite)**,
-a MediaTek MT6765 with 3 GB of RAM. Every decision here was measured on that hardware,
-not assumed.
+It targets one device: the Samsung Galaxy Tab A7 Lite LTE (SM-T225 / gta7lite), a
+MediaTek MT6765 with 3 GB of RAM. The figures below were measured on that hardware.
 
 > **Read this before flashing.** Unlocking the bootloader wipes the tablet and trips the
 > Knox fuse permanently, which disables Samsung Pass and Secure Folder for good. This is
@@ -62,19 +61,18 @@ not assumed.
 | Perfetto daemons | 2 resident | **0** |
 | SystemUI jank | 35.3% | **15.7%** |
 
-### The density finding
+### Density
 
-The single largest change is one number. The panel is 800×1340 at a physical density of
-213, but the system carried a 220 dpi override — which put the usable width at
-**582 dp**, just under Android's **600 dp** threshold for large-screen layouts.
+The panel is 800×1340 at a physical density of 213, but the system carried a 220 dpi
+override, which put the usable width at 582 dp — under Android's 600 dp threshold for
+large-screen layouts. At that width the system uses phone layouts: no taskbar, no
+two-column Settings, reduced multi-window behaviour.
 
-Eighteen dp were costing the tablet its taskbar, its two-column Settings and its
-multi-window behaviour. Dropping to 200 dpi gives 640 dp and hands all of it back.
+Setting 200 dpi gives 640 dp and the large-screen layouts apply.
 
-### Boot: measured, not guessed
+### Boot
 
-The black screen between the Samsung splash and the animation was not "a few seconds".
-Measured with `ro.boottime.*`:
+Timings measured with `ro.boottime.*`:
 
 ```
 ~13.8 s   bootloader hands off, SAMSUNG screen disappears
@@ -82,17 +80,17 @@ Measured with `ro.boottime.*`:
  31.2 s   bootanimation finally draws
 ```
 
-Surfaceflinger comes up **8.6 s before anything is drawn**. The fix paints the SAMSUNG
-screen straight into `/dev/graphics/fb0` from `post-fs-data`, and keeps repainting until
-`init.svc.bootanim` takes over — which proved that surfaceflinger, running but with
-nothing to compose, does not clear the framebuffer.
+Surfaceflinger starts 8.6 s before anything is drawn, so the panel is black in that
+window. The layer writes the SAMSUNG screen into `/dev/graphics/fb0` from `post-fs-data`
+and repeats until `init.svc.bootanim` takes over; surfaceflinger, running with nothing to
+compose, does not clear the framebuffer.
 
-The 150-frame animation was measured to cost **~2.0 s**. Removing it outright would have
-left twenty seconds of black, so it was replaced by a **single static frame** of the same
-SAMSUNG screen: 78% of the time back, and the panel stays lit the whole way.
+The 150-frame animation cost about 2.0 s. Removing it entirely would leave roughly twenty
+seconds of black screen, so it was replaced by a single static frame of the same image:
+1.54 s of the 1.98 s recovered, with the panel lit throughout.
 
-Around 7 s of black remain, from the bootloader handing off until `post-fs-data` runs.
-That is the earliest hook Magisk offers; closing it would need a kernel change.
+About 7 s of black remain, between the bootloader handing off and `post-fs-data` running.
+That is the earliest hook Magisk provides; removing it would require a kernel change.
 
 ### Screenshots
 
@@ -100,10 +98,10 @@ That is the earliest hook Magisk offers; closing it would need a kernel change.
 |---|---|---|---|
 | <img src="docs/img/home.png" alt="Home screen" width="100%"> | <img src="docs/img/settings.png" alt="Settings" width="100%"> | <img src="docs/img/quicksettings.png" alt="Quick settings" width="100%"> | <img src="docs/img/boot.png" alt="Boot screen" width="100%"> |
 
-### Credits — the work this is built on
+### Credits
 
-This project is a layer. The system underneath is other people's work, and it is the
-larger part of what you will be running.
+The system underneath is other people's work and is the larger part of what runs on the
+device.
 
 - **[LineageOS](https://lineageos.org/)** — the Android 14 base. This project uses the
   `lineage-21.0-arm64_bgN` GSI build; nothing in the system image was modified.
@@ -117,13 +115,13 @@ larger part of what you will be running.
 - **[TeamWin / TWRP](https://twrp.me/)** — the recovery used to install the GSI.
 - **Samsung** — the device, the bootloader and the vendor partition, which stays stock.
 
-Sistema2D is the tuning layer only: the boot art, the RRO overlays, the measurements and
-the scripts in this repository.
+Sistema2D covers only the tuning layer: the boot art, the RRO overlays and the scripts in
+this repository.
 
 ### Installation
 
-The full procedure is in **[INSTALL.md](INSTALL.md)** — from a stock tablet to a booted
-system, with the exact key combinations and what each step is for.
+The full procedure is in [INSTALL.md](INSTALL.md), from a stock tablet to a booted
+system, with the key combinations and the reason for each step.
 
 Short version:
 
@@ -135,10 +133,10 @@ Short version:
 6. Flash the four Sistema2D modules.
 7. Reboot, then run `rom/ajustes/aplicar-ajustes.ps1`.
 
-### What is in this repository
+### Repository layout
 
 ```
-rom/modulos/      the four Magisk modules — this is the ROM
+rom/modulos/      the four Magisk modules
 rom/overlays/     RRO sources and the reproducible build script
 rom/boot/         boot art generators and the 55 stock up_param resources
 rom/ajustes/      apply/revert scripts for settings-level tuning
@@ -147,7 +145,7 @@ ferramentas/      downloader for the third-party tools
 docs/             project page and screenshots
 ```
 
-### What is not in this repository, and why
+### Not included here
 
 Samsung's stock firmware (6 GB), Odin and the Samsung USB driver are Samsung's property
 and are not redistributed here. The Android platform-tools come from Google's own stable
@@ -159,7 +157,7 @@ TWRP and Magisk are open source and **are** published in the
 
 ### Reverting
 
-Every change is reversible and documented:
+Each change can be undone:
 
 - Interface and boot: disable the Magisk modules.
 - Settings-level tuning: `rom/ajustes/reverter-ajustes.ps1`.
@@ -180,14 +178,12 @@ Apache 2.0 — see [LICENSE](LICENSE). The credited projects keep their own lice
 
 ### O que é
 
-Sistema2D **não é uma ROM compilada do zero**. É uma camada de ajuste aplicada sobre uma
-GSI LineageOS 21 existente, entregue como módulos Magisk e overlays RRO. A imagem de
-sistema não é tocada — tudo que constitui este projeto está na camada, o que significa
-que instala em minutos e se desfaz desativando um módulo.
+Sistema2D não é uma ROM compilada do zero. É uma camada de ajuste aplicada sobre uma GSI
+LineageOS 21 existente, entregue como módulos Magisk e overlays RRO. A imagem de sistema
+não é modificada, então a camada instala em minutos e se desfaz desativando um módulo.
 
-O alvo é um aparelho só: o **Samsung Galaxy Tab A7 Lite LTE (SM-T225 / gta7lite)**, um
-MediaTek MT6765 com 3 GB de RAM. Cada decisão aqui foi medida nesse hardware, não
-presumida.
+O alvo é um aparelho: o Samsung Galaxy Tab A7 Lite LTE (SM-T225 / gta7lite), um MediaTek
+MT6765 com 3 GB de RAM. Os números abaixo foram medidos nesse hardware.
 
 > **Leia antes de gravar.** Desbloquear o bootloader apaga o tablet e queima o fusível
 > Knox de forma permanente, o que desativa Samsung Pass e Pasta Segura para sempre. É
@@ -206,20 +202,18 @@ presumida.
 | Daemons Perfetto | 2 residentes | **0** |
 | Jank da SystemUI | 35,3% | **15,7%** |
 
-### A descoberta da densidade
+### Densidade
 
-A maior mudança do projeto é um número só. O painel tem 800×1340 com densidade física
-213, mas o sistema carregava uma sobreposição de 220 dpi — que colocava a largura útil em
-**582 dp**, logo abaixo do corte de **600 dp** que o Android usa para layouts de tela
-grande.
+O painel tem 800×1340 com densidade física 213, mas o sistema carregava uma sobreposição
+de 220 dpi, que colocava a largura útil em 582 dp — abaixo do corte de 600 dp que o
+Android usa para layouts de tela grande. Nessa largura o sistema usa layout de telefone:
+sem taskbar, sem Configurações em duas colunas, multi-janela reduzida.
 
-Dezoito dp custavam ao tablet a taskbar, as Configurações em duas colunas e o
-comportamento de multi-janela. Baixar para 200 dpi dá 640 dp e devolve tudo isso.
+Definir 200 dpi dá 640 dp e os layouts de tela grande passam a valer.
 
-### Boot: medido, não chutado
+### Boot
 
-A tela preta entre a splash da Samsung e a animação não era "alguns segundos". Medido por
-`ro.boottime.*`:
+Tempos medidos com `ro.boottime.*`:
 
 ```
 ~13,8 s   o bootloader sai e some com a tela SAMSUNG
@@ -227,17 +221,17 @@ A tela preta entre a splash da Samsung e a animação não era "alguns segundos"
  31,2 s   a bootanimation finalmente desenha
 ```
 
-O surfaceflinger sobe **8,6 s antes de qualquer coisa ser desenhada**. A correção pinta a
-tela SAMSUNG direto em `/dev/graphics/fb0` a partir do `post-fs-data`, e continua
-repintando até `init.svc.bootanim` assumir — o que provou que o surfaceflinger, de pé mas
-sem nada para compor, não limpa o framebuffer.
+O surfaceflinger sobe 8,6 s antes de qualquer coisa ser desenhada, e o painel fica preto
+nesse intervalo. A camada escreve a tela SAMSUNG em `/dev/graphics/fb0` a partir do
+`post-fs-data` e repete até `init.svc.bootanim` assumir; o surfaceflinger, de pé e sem
+nada para compor, não limpa o framebuffer.
 
-A animação de 150 quadros custava **~2,0 s**, medidos. Removê-la de vez deixaria vinte
-segundos de tela preta, então foi trocada por um **único quadro estático** da mesma tela
-SAMSUNG: 78% do tempo de volta, e o painel fica aceso o caminho inteiro.
+A animação de 150 quadros custava cerca de 2,0 s. Removê-la por completo deixaria cerca
+de vinte segundos de tela preta, então foi trocada por um quadro estático da mesma
+imagem: 1,54 s dos 1,98 s recuperados, com o painel aceso o tempo todo.
 
-Restam cerca de 7 s de preto, do bootloader sair até o `post-fs-data` rodar. É o gancho
-mais cedo que o Magisk oferece; fechar isso exigiria mexer no kernel.
+Restam cerca de 7 s de preto, entre o bootloader sair e o `post-fs-data` rodar. É o
+gancho mais cedo que o Magisk oferece; remover exigiria mexer no kernel.
 
 ### Capturas
 
@@ -245,10 +239,10 @@ mais cedo que o Magisk oferece; fechar isso exigiria mexer no kernel.
 |---|---|---|---|
 | <img src="docs/img/home.png" alt="Tela inicial" width="100%"> | <img src="docs/img/settings.png" alt="Configurações" width="100%"> | <img src="docs/img/quicksettings.png" alt="Painel rápido" width="100%"> | <img src="docs/img/boot.png" alt="Tela de boot" width="100%"> |
 
-### Créditos — o trabalho em que isto se apoia
+### Créditos
 
-Este projeto é uma camada. O sistema por baixo é trabalho de outras pessoas, e é a maior
-parte do que você vai rodar.
+O sistema por baixo é trabalho de outras pessoas e é a maior parte do que roda no
+aparelho.
 
 - **[LineageOS](https://lineageos.org/)** — a base Android 14. Este projeto usa a GSI
   `lineage-21.0-arm64_bgN`; nada na imagem de sistema foi modificado.
@@ -262,13 +256,13 @@ parte do que você vai rodar.
 - **[TeamWin / TWRP](https://twrp.me/)** — o recovery usado para instalar a GSI.
 - **Samsung** — o aparelho, o bootloader e a partição vendor, que continua de fábrica.
 
-O Sistema2D é só a camada de ajuste: a arte de boot, os overlays RRO, as medições e os
+O Sistema2D cobre apenas a camada de ajuste: a arte de boot, os overlays RRO e os
 scripts deste repositório.
 
 ### Instalação
 
-O procedimento completo está em **[INSTALL.md](INSTALL.md)** — do tablet de fábrica ao
-sistema iniciado, com as combinações de teclas exatas e o porquê de cada passo.
+O procedimento completo está em [INSTALL.md](INSTALL.md), do tablet de fábrica ao sistema
+iniciado, com as combinações de teclas e o motivo de cada passo.
 
 Versão curta:
 
@@ -280,10 +274,10 @@ Versão curta:
 6. Gravar os quatro módulos Sistema2D.
 7. Reiniciar e rodar `rom/ajustes/aplicar-ajustes.ps1`.
 
-### O que tem neste repositório
+### Estrutura do repositório
 
 ```
-rom/modulos/      os quatro módulos Magisk — é isto que é a ROM
+rom/modulos/      os quatro módulos Magisk
 rom/overlays/     fontes dos RRO e o script de build reprodutível
 rom/boot/         geradores da arte de boot e os 55 recursos do up_param
 rom/ajustes/      scripts de aplicar/reverter os ajustes de settings
@@ -292,7 +286,7 @@ ferramentas/      baixador das ferramentas de terceiros
 docs/             página do projeto e capturas
 ```
 
-### O que não está aqui, e por quê
+### O que não está incluído
 
 O firmware de fábrica da Samsung (6 GB), o Odin e o driver USB são propriedade da Samsung
 e não são redistribuídos. As platform-tools vêm da URL estável do próprio Google. O
@@ -304,7 +298,7 @@ TWRP e Magisk são abertos e **estão** publicados na
 
 ### Reverter
 
-Toda mudança é reversível e documentada:
+Cada mudança pode ser desfeita:
 
 - Interface e boot: desative os módulos Magisk.
 - Ajustes de settings: `rom/ajustes/reverter-ajustes.ps1`.
